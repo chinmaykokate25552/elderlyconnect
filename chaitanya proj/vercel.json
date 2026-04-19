@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/index", "destination": "/index.html" },
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/elder", "destination": "/elder.html" },
+    { "source": "/helper", "destination": "/helper.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/:path*", "destination": "/404.html" }
+  ],
+  "cleanUrls": true
+}
