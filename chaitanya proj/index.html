@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElderlyConnect — Students Helping Elders Live Better</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤝</text></svg>"/>
+  <style>
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 0 5%;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 50%, #fef3c7 100%);
+    }
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .35;
+    }
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #fbbf24, #fb923c);
+      top: -100px; right: -100px;
+      animation: blobFloat 8s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #fcd34d, #fef3c7);
+      bottom: -80px; left: 10%;
+      animation: blobFloat 10s ease-in-out infinite reverse;
+    }
+    .blob-3 {
+      width: 200px; height: 200px;
+      background: #f97316;
+      top: 30%; left: 40%;
+      opacity: .15;
+      animation: blobFloat 6s ease-in-out infinite;
+    }
+    @keyframes blobFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(20px,-30px) scale(1.05); }
+      66% { transform: translate(-15px,20px) scale(.95); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 700px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(245,158,11,.12);
+      border: 1px solid rgba(245,158,11,.3);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: .82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--amber-700);
+      margin-bottom: 24px;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      color: var(--dark);
+      margin-bottom: 24px;
+      animation: fadeUp .6s .1s ease both;
+    }
+    .hero-title em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      color: var(--amber-600);
+    }
+    .hero-desc {
+      font-size: 1.15rem;
+      color: #555;
+      max-width: 540px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      animation: fadeUp .6s .2s ease both;
+    }
+    .hero-cta {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      animation: fadeUp .6s .3s ease both;
+    }
+    .hero-visual {
+      position: absolute;
+      right: 5%; top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+    .hero-cards-float {
+      position: relative;
+      width: 380px; height: 460px;
+    }
+    .float-card {
+      position: absolute;
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      border: 1px solid rgba(255,255,255,.8);
+      animation: floatCard 4s ease-in-out infinite;
+    }
+    .float-card:nth-child(1) {
+      top: 0; left: 20px;
+      width: 260px;
+      animation-delay: 0s;
+    }
+    .float-card:nth-child(2) {
+      top: 140px; right: 0;
+      width: 220px;
+      animation-delay: 1.3s;
+    }
+    .float-card:nth-child(3) {
+      bottom: 40px; left: 10px;
+      width: 240px;
+      animation-delay: 2.6s;
+    }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .float-card-label {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: #aaa; margin-bottom: 8px;
+    }
+    .float-card-title {
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .float-card-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .8rem; color: #666;
+    }
+    .avatar-sm {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+      background: var(--amber-100);
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      background: var(--dark);
+      padding: 28px 5%;
+      display: flex; align-items: center; justify-content: space-around;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--amber-400);
+    }
+    .stat-text { font-size: .85rem; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+    /* ── How it works ── */
+    .section { padding: 96px 5%; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--amber-600);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-desc { color: #666; font-size: 1.05rem; max-width: 540px; line-height: 1.7; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .step-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      border: 1px solid var(--warm-200);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .step-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: var(--transition);
+    }
+    .step-card:hover::before { transform: scaleX(1); }
+    .step-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 3.5rem; font-weight: 700;
+      color: var(--amber-200);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .step-icon { font-size: 2rem; margin-bottom: 16px; }
+    .step-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { color: #666; font-size: .92rem; line-height: 1.65; }
+
+    /* ── Role Picker ── */
+    .roles-section {
+      background: linear-gradient(135deg, var(--dark) 0%, #2d2a26 100%);
+      padding: 96px 5%;
+    }
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
+      margin-top: 60px;
+    }
+    .role-card {
+      border-radius: 24px;
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: block;
+    }
+    .role-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .role-card:hover { transform: translateY(-6px) scale(1.01); }
+    .role-helper { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .role-elder  { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+    .role-admin  { background: linear-gradient(135deg, #1c1917, #292524); border: 1px solid rgba(245,158,11,.3); }
+    .role-emoji { font-size: 3rem; margin-bottom: 20px; display: block; }
+    .role-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--dark); margin-bottom: 10px;
+    }
+    .role-admin .role-title { color: #fff; }
+    .role-desc { color: #666; font-size: .92rem; line-height: 1.65; margin-bottom: 24px; }
+    .role-admin .role-desc { color: rgba(255,255,255,.6); }
+    .role-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: .9rem;
+      color: var(--amber-700);
+      font-family: var(--font-display);
+    }
+    .role-admin .role-cta { color: var(--amber-400); }
+
+    /* ── Services showcase ── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+    .service-pill {
+      background: #fff;
+      border: 2px solid var(--warm-200);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .service-pill:hover {
+      border-color: var(--primary);
+      background: var(--amber-50);
+      transform: translateY(-3px);
+    }
+    .service-emoji { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .service-name { font-weight: 600; font-size: .88rem; }
+
+    /* ── Testimonials ── */
+    .testimonials-section { background: var(--warm-50); padding: 96px 5%; }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .testimonial-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 32px;
+      border: 1px solid var(--warm-200);
+      position: relative;
+    }
+    .testimonial-quote {
+      font-size: 3rem; color: var(--amber-200);
+      font-family: Georgia, serif;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .testimonial-text { font-size: .95rem; color: #555; line-height: 1.7; margin-bottom: 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%; background: var(--amber-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .author-name { font-weight: 700; font-size: .9rem; }
+    .author-role { font-size: .78rem; color: #888; }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--amber-500), var(--orange-600));
+      padding: 96px 5%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .cta-section > * { position: relative; z-index: 1; }
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 700; color: #fff;
+      letter-spacing: -.02em;
+      margin-bottom: 16px;
+    }
+    .cta-desc { color: rgba(255,255,255,.85); font-size: 1.1rem; margin-bottom: 40px; }
+    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: #fff; color: var(--amber-700); }
+    .btn-white:hover { background: var(--amber-50); transform: translateY(-2px); }
+    .btn-transparent { background: rgba(255,255,255,.15); color: #fff; border: 2px solid rgba(255,255,255,.4); }
+    .btn-transparent:hover { background: rgba(255,255,255,.25); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--dark);
+      padding: 60px 5% 32px;
+      color: rgba(255,255,255,.6);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand p { font-size: .9rem; line-height: 1.7; margin-top: 12px; max-width: 280px; }
+    .footer-brand .navbar-logo { margin-bottom: 8px; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .footer-col h4 {
+      color: #fff; font-family: var(--font-display);
+      font-size: .95rem; font-weight: 700; margin-bottom: 16px;
+    }
+    .footer-col a {
+      display: block; color: rgba(255,255,255,.5);
+      text-decoration: none; font-size: .88rem;
+      margin-bottom: 10px; transition: var(--transition);
+    }
+    .footer-col a:hover { color: var(--amber-400); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .82rem;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    /* ── Reveal on scroll ── */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media(max-width:900px){
+      .hero-visual { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:600px){
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-cta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-logo">
+    <div class="logo-icon">🤝</div>
+    ElderlyConnect
+  </a>
+  <div class="navbar-links">
+    <a href="#how" class="btn btn-outline btn-sm">How It Works</a>
+    <a href="#services" class="btn btn-outline btn-sm">Services</a>
+    <a href="auth.html" class="btn btn-primary btn-sm">Get Started →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-blob blob-1"></div>
+    <div class="hero-blob blob-2"></div>
+    <div class="hero-blob blob-3"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">✨ Students × Elders × Community</div>
+    <h1 class="hero-title">
+      Helping <em>elders</em> live with dignity &amp; ease
+    </h1>
+    <p class="hero-desc">
+      ElderlyConnect bridges the gap between students looking to earn and elderly people who need a helping hand — medicine pickups, cleaning, grocery runs &amp; more.
+    </p>
+    <div class="hero-cta">
+      <a href="auth.html?role=elder" class="btn btn-primary btn-lg">I Need Help →</a>
+      <a href="auth.html?role=helper" class="btn btn-dark btn-lg">I Want to Help</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-cards-float">
+      <div class="float-card">
+        <div class="float-card-label">New Task Posted</div>
+        <div class="float-card-title">💊 Medicine pickup from Apollo</div>
+        <div class="float-card-meta">
+          <div class="avatar-sm">👴</div>
+          Ramesh, 72 · ₹150 offer
+        </div>
+      </div>
+      <div class="float-card">
+        <div class="float-card-label">Task Completed ✅</div>
+        <div class="float-card-title">🧹 Floor cleaning done!</div>
+        <div class="float-card-meta">
+          <div class="avatar-sm">🎓</div>
+          Arjun earned ₹200
+        </div>
+      </div>
+      <div class="float-card">
+        <div class="float-card-label">⭐ 5.0 · Just Reviewed</div>
+        <div class="float-card-title">"Super helpful, fast & polite!"</div>
+        <div class="float-card-meta">
+          <div class="avatar-sm">👵</div>
+          Meena Aunty
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num" data-count="2400">0</div>
+    <div class="stat-text">Elders Helped</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-count="1800">0</div>
+    <div class="stat-text">Student Helpers</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-count="9600">0</div>
+    <div class="stat-text">Tasks Completed</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-count="98">0</div>
+    <div class="stat-text">% Satisfaction Rate</div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section" id="how">
+  <div class="reveal">
+    <div class="section-label">⚡ Simple Process</div>
+    <h2 class="section-title">How ElderlyConnect works</h2>
+    <p class="section-desc">Three easy steps to get things done or start earning as a student.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal animate-delay-1">
+      <div class="step-num">01</div>
+      <div class="step-icon">📝</div>
+      <div class="step-title">Post a Task</div>
+      <p class="step-desc">Elders describe what they need — medicine pickup, floor cleaning, grocery shopping, or anything else. Set a budget and timeline.</p>
+    </div>
+    <div class="step-card reveal animate-delay-2">
+      <div class="step-num">02</div>
+      <div class="step-icon">🎓</div>
+      <div class="step-title">Students Apply</div>
+      <p class="step-desc">Verified student helpers see the task and apply. Elders choose who they're comfortable with based on ratings and profile.</p>
+    </div>
+    <div class="step-card reveal animate-delay-3">
+      <div class="step-num">03</div>
+      <div class="step-icon">✅</div>
+      <div class="step-title">Task Done & Paid</div>
+      <p class="step-desc">Student completes the task, elder confirms completion, payment releases. Both leave reviews for a trusted community.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROLE CARDS ── -->
+<section class="roles-section">
+  <div style="max-width:600px">
+    <div class="section-label" style="color:var(--amber-400)">👥 Choose Your Role</div>
+    <h2 class="section-title" style="color:#fff">Join as an elder or a student helper</h2>
+  </div>
+  <div class="roles-grid" style="margin-top:60px">
+    <a href="auth.html?role=elder" class="role-card role-elder reveal animate-delay-1">
+      <span class="role-emoji">👴</span>
+      <div class="role-title">I'm an Elder</div>
+      <p class="role-desc">Need help with daily tasks? Post what you need and get matched with a trusted, verified student in your area.</p>
+      <div class="role-cta">Get Help Now →</div>
+    </a>
+    <a href="auth.html?role=helper" class="role-card role-helper reveal animate-delay-2">
+      <span class="role-emoji">🎓</span>
+      <div class="role-title">I'm a Student Helper</div>
+      <p class="role-desc">Earn money between classes by helping elders with simple everyday tasks. Flexible hours, real impact.</p>
+      <div class="role-cta">Start Earning →</div>
+    </a>
+    <a href="admin.html" class="role-card role-admin reveal animate-delay-3">
+      <span class="role-emoji">🛡️</span>
+      <div class="role-title" >Admin Panel</div>
+      <p class="role-desc">Platform administrators can manage users, monitor tasks, handle disputes, and keep the community safe.</p>
+      <div class="role-cta">Admin Access →</div>
+    </a>
+  </div>
+</section>
+
+<!-- ── SERVICES ── -->
+<section class="section" id="services">
+  <div class="reveal">
+    <div class="section-label">🛠️ What We Cover</div>
+    <h2 class="section-title">Popular services on ElderlyConnect</h2>
+    <p class="section-desc">From daily chores to urgent errands, students can help with all kinds of tasks.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-pill reveal">
+      <span class="service-emoji">💊</span>
+      <div class="service-name">Medicine Pickup</div>
+    </div>
+    <div class="service-pill reveal animate-delay-1">
+      <span class="service-emoji">🛒</span>
+      <div class="service-name">Grocery Shopping</div>
+    </div>
+    <div class="service-pill reveal animate-delay-2">
+      <span class="service-emoji">🧹</span>
+      <div class="service-name">Floor Cleaning</div>
+    </div>
+    <div class="service-pill reveal animate-delay-3">
+      <span class="service-emoji">🍳</span>
+      <div class="service-name">Meal Prep</div>
+    </div>
+    <div class="service-pill reveal animate-delay-4">
+      <span class="service-emoji">🐾</span>
+      <div class="service-name">Pet Care</div>
+    </div>
+    <div class="service-pill reveal animate-delay-5">
+      <span class="service-emoji">📦</span>
+      <div class="service-name">Parcel/Courier</div>
+    </div>
+    <div class="service-pill reveal">
+      <span class="service-emoji">💻</span>
+      <div class="service-name">Tech Help</div>
+    </div>
+    <div class="service-pill reveal animate-delay-1">
+      <span class="service-emoji">🏥</span>
+      <div class="service-name">Hospital Visits</div>
+    </div>
+    <div class="service-pill reveal animate-delay-2">
+      <span class="service-emoji">🌿</span>
+      <div class="service-name">Garden Care</div>
+    </div>
+    <div class="service-pill reveal animate-delay-3">
+      <span class="service-emoji">📚</span>
+      <div class="service-name">Reading Aloud</div>
+    </div>
+    <div class="service-pill reveal animate-delay-4">
+      <span class="service-emoji">🧺</span>
+      <div class="service-name">Laundry</div>
+    </div>
+    <div class="service-pill reveal animate-delay-5">
+      <span class="service-emoji">🚗</span>
+      <div class="service-name">Rides & Escort</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="testimonials-section">
+  <div class="reveal">
+    <div class="section-label">💬 Real Stories</div>
+    <h2 class="section-title">What our community says</h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal animate-delay-1">
+      <div class="testimonial-quote">"</div>
+      <p class="testimonial-text">My knees make it hard to go to the pharmacy. Now I just post a task and Arjun picks up my medicines the same evening. God bless this app!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👴</div>
+        <div>
+          <div class="author-name">Ramesh Kumar, 72</div>
+          <div class="author-role">Elder · Pune</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal animate-delay-2">
+      <div class="testimonial-quote">"</div>
+      <p class="testimonial-text">I earned ₹4,500 last month doing tasks between my college lectures. The elders are so grateful and kind. It feels amazing to actually help.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">🎓</div>
+        <div>
+          <div class="author-name">Priya Sharma, 20</div>
+          <div class="author-role">Student Helper · Mumbai</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal animate-delay-3">
+      <div class="testimonial-quote">"</div>
+      <p class="testimonial-text">My daughter lives in Bangalore. ElderlyConnect gave me peace of mind — there are always young people ready to help me whenever I need them.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👵</div>
+        <div>
+          <div class="author-name">Meena Deshpande, 68</div>
+          <div class="author-role">Elder · Nashik</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <h2 class="cta-title">Ready to connect?</h2>
+  <p class="cta-desc">Join thousands of students and elders building a caring community together.</p>
+  <div class="cta-btns">
+    <a href="auth.html?role=elder" class="btn btn-white btn-lg">I Need Help</a>
+    <a href="auth.html?role=helper" class="btn btn-transparent btn-lg">I Want to Help</a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="navbar-logo">
+        <div class="logo-icon">🤝</div>
+        ElderlyConnect
+      </div>
+      <p>Bridging generations — students earn, elders live with dignity and ease. Building a kinder community, one task at a time.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="#">How It Works</a>
+      <a href="#">Services</a>
+      <a href="#">Pricing</a>
+      <a href="#">Safety</a>
+    </div>
+    <div class="footer-col">
+      <h4>For Students</h4>
+      <a href="auth.html?role=helper">Sign Up as Helper</a>
+      <a href="#">Earning Guide</a>
+      <a href="#">Verification</a>
+    </div>
+    <div class="footer-col">
+      <h4>For Elders</h4>
+      <a href="auth.html?role=elder">Post a Task</a>
+      <a href="#">Trust & Safety</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 ElderlyConnect. Made with ❤️ for a kinder world.</span>
+    <span>Privacy Policy · Terms of Service</span>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script>
+// ── Navbar scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Counter animation
+function animateCounter(el, target, suffix = '') {
+  let current = 0;
+  const step = target / 60;
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = Math.floor(current).toLocaleString() + suffix;
+    if (current >= target) clearInterval(timer);
+  }, 25);
+}
+
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('[data-count]').forEach(el => {
+        animateCounter(el, parseInt(el.dataset.count), el.dataset.suffix || '');
+      });
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+const statsBar = document.querySelector('.stats-bar');
+if (statsBar) statsObserver.observe(statsBar);
+</script>
+</body>
+</html>

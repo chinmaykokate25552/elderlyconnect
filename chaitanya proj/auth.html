@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElderlyConnect — Sign In / Sign Up</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 60%, #fef3c7 100%); min-height: 100vh; display: flex; }
+
+    .auth-split { display: flex; min-height: 100vh; width: 100%; }
+
+    /* Left panel */
+    .auth-left {
+      flex: 1;
+      background: linear-gradient(160deg, var(--dark) 0%, #2d2520 100%);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 60px;
+      position: relative; overflow: hidden;
+    }
+    .auth-left-bg {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .auth-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .2;
+    }
+    .ab1 { width: 500px; height: 500px; background: var(--amber-500); top: -100px; right: -100px; animation: blobFloat 7s ease-in-out infinite; }
+    .ab2 { width: 300px; height: 300px; background: var(--orange-500); bottom: -50px; left: -50px; animation: blobFloat 9s ease-in-out infinite reverse; }
+    @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(20px,-20px) scale(1.08);} }
+
+    .auth-left-content { position: relative; z-index: 2; }
+    .auth-logo {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;
+      color: #fff; text-decoration: none; margin-bottom: 64px;
+    }
+    .auth-logo .logo-icon { width: 42px; height: 42px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+
+    .auth-pitch-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3vw, 3rem);
+      font-weight: 700; color: #fff;
+      line-height: 1.1; letter-spacing: -.02em;
+      margin-bottom: 20px;
+    }
+    .auth-pitch-title em { font-family: var(--font-serif); font-style: italic; color: var(--amber-400); }
+    .auth-pitch-desc { color: rgba(255,255,255,.6); font-size: .95rem; line-height: 1.7; margin-bottom: 48px; max-width: 380px; }
+
+    .feature-list { display: flex; flex-direction: column; gap: 16px; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(245,158,11,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .feature-text h4 { color: #fff; font-weight: 600; font-size: .95rem; margin-bottom: 2px; }
+    .feature-text p { color: rgba(255,255,255,.5); font-size: .82rem; }
+
+    /* Right panel */
+    .auth-right {
+      width: 500px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px 40px;
+      background: #fff;
+    }
+    .auth-box { width: 100%; max-width: 420px; }
+
+    /* Role selector */
+    .role-toggle {
+      display: flex; gap: 12px; margin-bottom: 28px;
+    }
+    .role-btn {
+      flex: 1; padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--warm-200);
+      background: var(--warm-50);
+      cursor: pointer; text-align: center;
+      transition: var(--transition);
+      font-family: var(--font-body);
+    }
+    .role-btn .role-emoji { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .role-btn .role-label { font-weight: 600; font-size: .85rem; }
+    .role-btn.selected {
+      border-color: var(--primary);
+      background: var(--amber-50);
+      box-shadow: 0 0 0 4px rgba(245,158,11,.1);
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex; background: var(--warm-100);
+      border-radius: var(--radius-sm);
+      padding: 4px; margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px;
+      border: none; background: none; cursor: pointer;
+      font-family: var(--font-body); font-weight: 600; font-size: .9rem;
+      border-radius: 8px; color: #888;
+      transition: var(--transition);
+    }
+    .tab-btn.active { background: #fff; color: var(--dark); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+    .auth-form { display: none; }
+    .auth-form.active { display: block; animation: fadeUp .35s ease both; }
+
+    .auth-heading {
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .auth-subheading { color: #888; font-size: .88rem; margin-bottom: 24px; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0; color: #bbb; font-size: .82rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--warm-200);
+    }
+
+    .back-home {
+      display: flex; align-items: center; gap: 6px;
+      color: #888; font-size: .82rem; text-decoration: none;
+      margin-top: 24px; justify-content: center;
+      transition: var(--transition);
+    }
+    .back-home:hover { color: var(--primary); }
+
+    @media(max-width:900px){
+      .auth-left { display: none; }
+      .auth-right { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-split">
+  <!-- LEFT -->
+  <div class="auth-left">
+    <div class="auth-left-bg">
+      <div class="auth-blob ab1"></div>
+      <div class="auth-blob ab2"></div>
+    </div>
+    <div class="auth-left-content">
+      <a href="index.html" class="auth-logo">
+        <div class="logo-icon">🤝</div>
+        ElderlyConnect
+      </a>
+      <h2 class="auth-pitch-title">A platform built on <em>trust &amp; care</em></h2>
+      <p class="auth-pitch-desc">Whether you're a student looking to earn or an elder who needs a helping hand — ElderlyConnect makes it simple and safe.</p>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon">✅</div>
+          <div class="feature-text">
+            <h4>Verified Community</h4>
+            <p>Every helper is student-verified for safety and trust.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-text">
+            <h4>Fast Matching</h4>
+            <p>Tasks get picked up within hours, not days.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-text">
+            <h4>Secure Platform</h4>
+            <p>Your data and payments are always protected.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <div class="auth-box">
+      <!-- Role Toggle -->
+      <div class="role-toggle" id="roleToggle">
+        <button class="role-btn selected" data-role="elder" onclick="selectRole('elder')">
+          <span class="role-emoji">👴</span>
+          <span class="role-label">I Need Help</span>
+        </button>
+        <button class="role-btn" data-role="helper" onclick="selectRole('helper')">
+          <span class="role-emoji">🎓</span>
+          <span class="role-label">I'm a Helper</span>
+        </button>
+        <button class="role-btn" data-role="admin" onclick="selectRole('admin')">
+          <span class="role-emoji">🛡️</span>
+          <span class="role-label">Admin</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="auth-form active" id="signin-form">
+        <h2 class="auth-heading">Welcome back 👋</h2>
+        <p class="auth-subheading">Sign in to your ElderlyConnect account</p>
+
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" class="input" id="si-email" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="input" id="si-password" placeholder="••••••••"/>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="handleSignIn()">Sign In →</button>
+        <div class="divider">or</div>
+        <p style="text-align:center;font-size:.85rem;color:#888">Don't have an account? <a href="#" onclick="switchTab('signup')" style="color:var(--primary);font-weight:600">Sign Up</a></p>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="auth-form" id="signup-form">
+        <h2 class="auth-heading">Join ElderlyConnect 🌟</h2>
+        <p class="auth-subheading">Create your free account in seconds</p>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" class="input" id="su-name" placeholder="Your full name"/>
+        </div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" class="input" id="su-email" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label>Phone number</label>
+          <input type="tel" class="input" id="su-phone" placeholder="+91 98765 43210"/>
+        </div>
+        <div class="form-group">
+          <label>City / Area</label>
+          <input type="text" class="input" id="su-city" placeholder="e.g. Pune, Mumbai"/>
+        </div>
+        <div class="form-group" id="college-group" style="display:none">
+          <label>College Name</label>
+          <input type="text" class="input" id="su-college" placeholder="Your college name"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="input" id="su-password" placeholder="Min 8 characters"/>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="handleSignUp()">Create Account →</button>
+        <div class="divider">or</div>
+        <p style="text-align:center;font-size:.85rem;color:#888">Already have an account? <a href="#" onclick="switchTab('signin')" style="color:var(--primary);font-weight:600">Sign In</a></p>
+      </div>
+
+      <a href="index.html" class="back-home">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="loader-overlay" id="loader" style="display:none"><div class="spinner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+let selectedRole = 'elder';
+
+// Pre-select role from URL param
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('role')) selectRole(urlParams.get('role'));
+
+// Switch tab if query param says signup
+if (urlParams.get('tab') === 'signup') switchTab('signup');
+
+function selectRole(role) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+  document.getElementById('college-group').style.display = role === 'helper' ? 'flex' : 'none';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'signin')));
+  document.getElementById('signin-form').classList.toggle('active', tab === 'signin');
+  document.getElementById('signup-form').classList.toggle('active', tab === 'signup');
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function showLoader(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+
+async function handleSignIn() {
+  const email = document.getElementById('si-email').value.trim();
+  const password = document.getElementById('si-password').value;
+  if (!email || !password) return showToast('Please fill all fields', 'error');
+
+  showLoader(true);
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  showLoader(false);
+
+  if (error) return showToast(error.message, 'error');
+
+  const profile = await getProfile(data.user.id);
+  showToast('Signed in! Redirecting...', 'success');
+  setTimeout(() => {
+    if (profile?.role === 'admin') window.location.href = 'admin.html';
+    else if (profile?.role === 'helper') window.location.href = 'helper.html';
+    else window.location.href = 'elder.html';
+  }, 1000);
+}
+
+async function handleSignUp() {
+  const name  = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const phone = document.getElementById('su-phone').value.trim();
+  const city  = document.getElementById('su-city').value.trim();
+  const college = document.getElementById('su-college').value.trim();
+  const pass  = document.getElementById('su-password').value;
+
+  if (!name || !email || !phone || !city || !pass) return showToast('Please fill all required fields', 'error');
+  if (pass.length < 8) return showToast('Password must be at least 8 characters', 'error');
+  if (selectedRole === 'helper' && !college) return showToast('Please enter your college name', 'error');
+
+  showLoader(true);
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  if (error) { showLoader(false); return showToast(error.message, 'error'); }
+
+  // Insert profile
+  const { error: profileError } = await sb.from('profiles').insert({
+    id: data.user.id,
+    full_name: name,
+    email,
+    phone,
+    city,
+    college: selectedRole === 'helper' ? college : null,
+    role: selectedRole,
+    is_verified: false,
+    rating: 0,
+    tasks_completed: 0,
+    created_at: new Date().toISOString()
+  });
+  showLoader(false);
+
+  if (profileError) return showToast('Account created but profile error: ' + profileError.message, 'error');
+
+  showToast('Account created! Check your email to confirm.', 'success');
+  setTimeout(() => {
+    if (selectedRole === 'helper') window.location.href = 'helper.html';
+    else if (selectedRole === 'admin') window.location.href = 'admin.html';
+    else window.location.href = 'elder.html';
+  }, 2000);
+}
+</script>
+</body>
+</html>

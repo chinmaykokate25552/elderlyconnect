@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElderlyConnect — Elder Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background: var(--warm-50); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--amber-500); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .user-info { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+    .user-name { font-weight: 600; font-size: .9rem; color: #fff; }
+    .user-role-label { font-size: .75rem; color: rgba(255,255,255,.5); }
+    .sidebar-bottom { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+
+    .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .task-card { background: #fff; border-radius: var(--radius); padding: 24px; border: 1px solid var(--warm-100); box-shadow: var(--shadow); transition: var(--transition); }
+    .task-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .task-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .task-emoji { font-size: 2rem; }
+    .task-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .task-desc { font-size: .88rem; color: #666; line-height: 1.6; margin-bottom: 14px; }
+    .task-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .task-price { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--amber-600); }
+    .task-footer { display: flex; align-items: center; justify-content: space-between; }
+    .applicants-count { font-size: .82rem; color: #888; }
+
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state .empty-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .empty-state p { color: #888; margin-bottom: 24px; }
+
+    .app-item { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--warm-100); margin-bottom: 12px; background: #fff; transition: var(--transition); }
+    .app-item:hover { border-color: var(--amber-300); }
+    .app-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--amber-100); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .app-info { flex: 1; }
+    .app-name { font-weight: 700; font-size: .95rem; }
+    .app-detail { font-size: .8rem; color: #888; margin-top: 2px; }
+    .app-actions { display: flex; gap: 8px; }
+
+    .content-section { display: none; }
+    .content-section.active { display: block; animation: fadeUp .4s ease both; }
+
+    .post-form { background: #fff; border-radius: var(--radius); padding: 36px; max-width: 640px; box-shadow: var(--shadow); border: 1px solid var(--warm-100); }
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 8px; }
+    .cat-btn { padding: 12px 8px; border-radius: 10px; border: 2px solid var(--warm-200); background: var(--warm-50); cursor: pointer; text-align: center; font-family: var(--font-body); transition: var(--transition); font-size: .82rem; font-weight: 600; }
+    .cat-btn .cat-emoji { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .cat-btn.selected { border-color: var(--primary); background: var(--amber-50); }
+    .cat-btn:hover { border-color: var(--amber-300); }
+  </style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🤝</div>
+      ElderlyConnect
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('my-tasks')"><span class="nav-icon">📋</span> My Tasks</button>
+      <button class="nav-item" onclick="showSection('post-task')"><span class="nav-icon">➕</span> Post a Task</button>
+      <button class="nav-item" onclick="showSection('applications')"><span class="nav-icon">👥</span> Applications</button>
+      <button class="nav-item" onclick="showSection('profile-section')"><span class="nav-icon">👤</span> My Profile</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar">👴</div>
+        <div>
+          <div class="user-name" id="sidebar-name">Loading...</div>
+          <div class="user-role-label">Elder Member</div>
+        </div>
+      </div>
+      <button class="nav-item" style="color:#f87171;margin-top:8px" onclick="signOut()"><span class="nav-icon">🚪</span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <!-- MY TASKS -->
+    <div class="content-section active" id="my-tasks">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">My Tasks</h1>
+          <p class="dash-subtitle">Tasks you've posted and their current status</p>
+        </div>
+        <button class="btn btn-primary" onclick="showSection('post-task')">+ Post New Task</button>
+      </div>
+      <div class="stat-grid" style="margin-bottom:32px">
+        <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-label">Total Posted</div><div class="stat-value" id="stat-total">0</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">Open Tasks</div><div class="stat-value" id="stat-open">0</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Completed</div><div class="stat-value" id="stat-done">0</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Avg Rating Given</div><div class="stat-value" id="stat-rating">—</div></div>
+      </div>
+      <div class="tasks-grid" id="tasks-grid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-emoji">📭</div>
+          <h3>No tasks yet</h3>
+          <p>Post your first task and get help today!</p>
+          <button class="btn btn-primary" onclick="showSection('post-task')">Post a Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POST TASK -->
+    <div class="content-section" id="post-task">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Post a New Task</h1>
+          <p class="dash-subtitle">Describe what you need help with</p>
+        </div>
+      </div>
+      <div class="post-form">
+        <div class="form-group">
+          <label>Task Category</label>
+          <div class="category-grid" id="cat-grid">
+            <button class="cat-btn" data-cat="Medicine" onclick="selectCat(this)"><span class="cat-emoji">💊</span>Medicine</button>
+            <button class="cat-btn" data-cat="Grocery" onclick="selectCat(this)"><span class="cat-emoji">🛒</span>Grocery</button>
+            <button class="cat-btn" data-cat="Cleaning" onclick="selectCat(this)"><span class="cat-emoji">🧹</span>Cleaning</button>
+            <button class="cat-btn" data-cat="Cooking" onclick="selectCat(this)"><span class="cat-emoji">🍳</span>Cooking</button>
+            <button class="cat-btn" data-cat="Tech Help" onclick="selectCat(this)"><span class="cat-emoji">💻</span>Tech Help</button>
+            <button class="cat-btn" data-cat="Hospital" onclick="selectCat(this)"><span class="cat-emoji">🏥</span>Hospital</button>
+            <button class="cat-btn" data-cat="Laundry" onclick="selectCat(this)"><span class="cat-emoji">🧺</span>Laundry</button>
+            <button class="cat-btn" data-cat="Other" onclick="selectCat(this)"><span class="cat-emoji">📦</span>Other</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" class="input" id="task-title" placeholder="e.g. Pick up medicines from Apollo Pharmacy"/>
+        </div>
+        <div class="form-group">
+          <label>Full Description</label>
+          <textarea class="input" id="task-desc" placeholder="Describe exactly what needs to be done, any special instructions, medicines list, etc."></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group">
+            <label>Budget Offer (₹)</label>
+            <input type="number" class="input" id="task-budget" placeholder="150"/>
+          </div>
+          <div class="form-group">
+            <label>Urgency</label>
+            <select class="input" id="task-urgency">
+              <option value="flexible">Flexible (any time)</option>
+              <option value="today">Today</option>
+              <option value="urgent">Urgent (within 2 hrs)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Your Address / Location</label>
+          <input type="text" class="input" id="task-location" placeholder="Full address or landmark"/>
+        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px" onclick="postTask()">Post Task →</button>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS -->
+    <div class="content-section" id="applications">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Applications</h1>
+          <p class="dash-subtitle">Students who applied to your tasks</p>
+        </div>
+      </div>
+      <div id="applications-list">
+        <div class="empty-state">
+          <div class="empty-emoji">📬</div>
+          <h3>No applications yet</h3>
+          <p>Once you post tasks, students will apply here.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="profile-section">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">My Profile</h1>
+          <p class="dash-subtitle">Your ElderlyConnect account details</p>
+        </div>
+      </div>
+      <div class="post-form">
+        <div style="text-align:center;margin-bottom:32px">
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--amber-100);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 16px">👴</div>
+          <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:700" id="profile-name">—</h3>
+          <span class="badge badge-amber" style="margin-top:8px">Elder Member</span>
+        </div>
+        <div class="form-group"><label>Full Name</label><input type="text" class="input" id="p-name" placeholder="—"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" class="input" id="p-phone" placeholder="—"/></div>
+        <div class="form-group"><label>City</label><input type="text" class="input" id="p-city" placeholder="—"/></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+<div class="loader-overlay" id="loader" style="display:none"><div class="spinner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+let currentUser = null;
+let userProfile = null;
+let selectedCategory = '';
+
+const catEmojis = { Medicine:'💊', Grocery:'🛒', Cleaning:'🧹', Cooking:'🍳', 'Tech Help':'💻', Hospital:'🏥', Laundry:'🧺', Other:'📦' };
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const auth = await requireAuth('elder');
+  if (!auth) return;
+  currentUser = auth.session.user;
+  userProfile = auth.profile;
+  document.getElementById('sidebar-name').textContent = userProfile.full_name || 'Elder';
+  document.getElementById('profile-name').textContent = userProfile.full_name || '';
+  document.getElementById('p-name').value = userProfile.full_name || '';
+  document.getElementById('p-phone').value = userProfile.phone || '';
+  document.getElementById('p-city').value = userProfile.city || '';
+  loadTasks();
+  loadApplications();
+});
+
+function showSection(id) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event?.currentTarget?.classList.add('active');
+}
+
+function selectCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedCategory = btn.dataset.cat;
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function showLoader(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+
+async function loadTasks() {
+  const { data: tasks } = await sb.from('tasks').select('*').eq('elder_id', currentUser.id).order('created_at', { ascending: false });
+  if (!tasks || tasks.length === 0) return;
+
+  const total = tasks.length;
+  const open = tasks.filter(t => t.status === 'open').length;
+  const done = tasks.filter(t => t.status === 'completed').length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-open').textContent = open;
+  document.getElementById('stat-done').textContent = done;
+
+  const grid = document.getElementById('tasks-grid');
+  grid.innerHTML = tasks.map(t => `
+    <div class="task-card">
+      <div class="task-header">
+        <div>
+          <div class="task-emoji">${catEmojis[t.category] || '📦'}</div>
+          <div class="task-title">${t.title}</div>
+        </div>
+        <span class="badge ${t.status === 'open' ? 'badge-green' : t.status === 'in_progress' ? 'badge-blue' : 'badge-amber'}">${t.status}</span>
+      </div>
+      <p class="task-desc">${t.description}</p>
+      <div class="task-meta">
+        <span class="badge badge-amber">📍 ${t.location || 'N/A'}</span>
+        <span class="badge badge-blue">⏱ ${t.urgency}</span>
+      </div>
+      <div class="task-footer">
+        <div class="task-price">₹${t.budget}</div>
+        ${t.status === 'open' ? `<button class="btn btn-outline btn-sm" onclick="deleteTask('${t.id}')">Delete</button>` : ''}
+        ${t.status === 'in_progress' ? `<button class="btn btn-primary btn-sm" onclick="markDone('${t.id}')">Mark Complete ✅</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadApplications() {
+  const { data: apps } = await sb.from('applications')
+    .select('*, tasks(title), profiles(full_name, city, college, rating)')
+    .eq('tasks.elder_id', currentUser.id);
+
+  if (!apps || apps.length === 0) return;
+  const list = document.getElementById('applications-list');
+  list.innerHTML = apps.map(a => `
+    <div class="app-item">
+      <div class="app-avatar">🎓</div>
+      <div class="app-info">
+        <div class="app-name">${a.profiles?.full_name || 'Student'}</div>
+        <div class="app-detail">📍 ${a.profiles?.city || '—'} · 🎓 ${a.profiles?.college || '—'} · ⭐ ${a.profiles?.rating || 'New'}</div>
+        <div class="app-detail" style="margin-top:4px">For: <strong>${a.tasks?.title || '—'}</strong></div>
+      </div>
+      <div class="app-actions">
+        ${a.status === 'pending' ? `
+          <button class="btn btn-primary btn-sm" onclick="acceptApp('${a.id}','${a.task_id}','${a.helper_id}')">Accept</button>
+          <button class="btn btn-outline btn-sm" onclick="rejectApp('${a.id}')">Decline</button>
+        ` : `<span class="badge ${a.status === 'accepted' ? 'badge-green' : 'badge-red'}">${a.status}</span>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function postTask() {
+  if (!selectedCategory) return showToast('Please select a category', 'error');
+  const title = document.getElementById('task-title').value.trim();
+  const desc = document.getElementById('task-desc').value.trim();
+  const budget = document.getElementById('task-budget').value;
+  const urgency = document.getElementById('task-urgency').value;
+  const location = document.getElementById('task-location').value.trim();
+  if (!title || !desc || !budget || !location) return showToast('Please fill all fields', 'error');
+
+  showLoader(true);
+  const { error } = await sb.from('tasks').insert({
+    elder_id: currentUser.id,
+    elder_name: userProfile.full_name,
+    category: selectedCategory,
+    title, description: desc,
+    budget: parseInt(budget),
+    urgency, location,
+    status: 'open',
+    created_at: new Date().toISOString()
+  });
+  showLoader(false);
+  if (error) return showToast('Error: ' + error.message, 'error');
+  showToast('Task posted successfully! 🎉', 'success');
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-desc').value = '';
+  document.getElementById('task-budget').value = '';
+  document.getElementById('task-location').value = '';
+  selectedCategory = '';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  loadTasks();
+  showSection('my-tasks');
+}
+
+async function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  await sb.from('tasks').delete().eq('id', id);
+  showToast('Task deleted', 'info');
+  loadTasks();
+}
+
+async function markDone(id) {
+  await sb.from('tasks').update({ status: 'completed' }).eq('id', id);
+  showToast('Task marked as complete! ✅', 'success');
+  loadTasks();
+}
+
+async function acceptApp(appId, taskId, helperId) {
+  await sb.from('applications').update({ status: 'accepted' }).eq('id', appId);
+  await sb.from('tasks').update({ status: 'in_progress', assigned_helper: helperId }).eq('id', taskId);
+  await sb.from('applications').update({ status: 'rejected' }).eq('task_id', taskId).neq('id', appId);
+  showToast('Helper accepted! ✅', 'success');
+  loadApplications();
+  loadTasks();
+}
+
+async function rejectApp(appId) {
+  await sb.from('applications').update({ status: 'rejected' }).eq('id', appId);
+  showToast('Application declined', 'info');
+  loadApplications();
+}
+
+async function saveProfile() {
+  showLoader(true);
+  const { error } = await sb.from('profiles').update({
+    full_name: document.getElementById('p-name').value,
+    phone: document.getElementById('p-phone').value,
+    city: document.getElementById('p-city').value
+  }).eq('id', currentUser.id);
+  showLoader(false);
+  if (error) return showToast('Error: ' + error.message, 'error');
+  showToast('Profile saved! ✅', 'success');
+}
+</script>
+</body>
+</html>

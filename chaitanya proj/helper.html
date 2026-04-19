@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElderlyConnect — Helper Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background: var(--warm-50); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--amber-500); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .user-info { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+    .user-name { font-weight: 600; font-size: .9rem; color: #fff; }
+    .user-role-label { font-size: .75rem; color: rgba(255,255,255,.5); }
+    .sidebar-bottom { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+
+    .content-section { display: none; }
+    .content-section.active { display: block; animation: fadeUp .4s ease both; }
+
+    /* Browse tasks */
+    .browse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .task-card { background: #fff; border-radius: var(--radius); padding: 24px; border: 1px solid var(--warm-100); box-shadow: var(--shadow); transition: var(--transition); }
+    .task-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .task-emoji-big { font-size: 2.2rem; }
+    .task-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .task-desc { font-size: .88rem; color: #666; line-height: 1.6; margin-bottom: 14px; }
+    .task-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .task-footer { display: flex; align-items: center; justify-content: space-between; }
+    .task-price { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--amber-600); }
+    .task-elder { font-size: .8rem; color: #888; }
+
+    /* Filters */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .filter-btn { padding: 8px 18px; border-radius: 99px; border: 2px solid var(--warm-200); background: #fff; cursor: pointer; font-size: .83rem; font-weight: 600; transition: var(--transition); }
+    .filter-btn.active, .filter-btn:hover { border-color: var(--primary); background: var(--amber-50); color: var(--amber-700); }
+
+    /* My applications */
+    .my-app-item { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--warm-100); margin-bottom: 12px; background: #fff; }
+    .my-app-emoji { font-size: 1.8rem; width: 44px; text-align: center; flex-shrink: 0; }
+    .my-app-info { flex: 1; }
+    .my-app-title { font-weight: 700; font-size: .95rem; }
+    .my-app-meta { font-size: .8rem; color: #888; margin-top: 3px; }
+
+    /* Earnings */
+    .earnings-card { background: linear-gradient(135deg, var(--amber-500), var(--orange-600)); border-radius: var(--radius); padding: 32px; color: #fff; margin-bottom: 24px; }
+    .earnings-card .earn-title { font-size: .9rem; opacity: .8; margin-bottom: 8px; font-weight: 600; }
+    .earnings-card .earn-amount { font-family: var(--font-display); font-size: 3rem; font-weight: 700; }
+    .earnings-card .earn-sub { font-size: .85rem; opacity: .75; margin-top: 6px; }
+
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state .empty-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .empty-state p { color: #888; margin-bottom: 24px; }
+
+    .search-bar { position: relative; margin-bottom: 20px; }
+    .search-bar input { width: 100%; padding: 14px 20px 14px 48px; border-radius: 99px; border: 2px solid var(--warm-200); background: #fff; font-family: var(--font-body); font-size: .95rem; outline: none; transition: var(--transition); }
+    .search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(245,158,11,.1); }
+    .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🤝</div>
+      ElderlyConnect
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('browse')"><span class="nav-icon">🔍</span> Browse Tasks</button>
+      <button class="nav-item" onclick="showSection('my-apps')"><span class="nav-icon">📬</span> My Applications</button>
+      <button class="nav-item" onclick="showSection('active-tasks')"><span class="nav-icon">⚡</span> Active Tasks</button>
+      <button class="nav-item" onclick="showSection('earnings')"><span class="nav-icon">💰</span> Earnings</button>
+      <button class="nav-item" onclick="showSection('profile-section')"><span class="nav-icon">👤</span> My Profile</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="user-avatar">🎓</div>
+        <div>
+          <div class="user-name" id="sidebar-name">Loading...</div>
+          <div class="user-role-label">Student Helper</div>
+        </div>
+      </div>
+      <button class="nav-item" style="color:#f87171;margin-top:8px" onclick="signOut()"><span class="nav-icon">🚪</span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <!-- BROWSE TASKS -->
+    <div class="content-section active" id="browse">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Browse Tasks</h1>
+          <p class="dash-subtitle">Find tasks near you and start earning</p>
+        </div>
+        <div class="stat-card" style="min-width:160px">
+          <div class="stat-label">Available Now</div>
+          <div class="stat-value" id="available-count" style="font-size:1.8rem">—</div>
+        </div>
+      </div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search tasks by keyword, location..." oninput="filterTasks()"/>
+      </div>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" data-cat="all" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn" data-cat="Medicine" onclick="setFilter('Medicine', this)">💊 Medicine</button>
+        <button class="filter-btn" data-cat="Grocery" onclick="setFilter('Grocery', this)">🛒 Grocery</button>
+        <button class="filter-btn" data-cat="Cleaning" onclick="setFilter('Cleaning', this)">🧹 Cleaning</button>
+        <button class="filter-btn" data-cat="Cooking" onclick="setFilter('Cooking', this)">🍳 Cooking</button>
+        <button class="filter-btn" data-cat="Tech Help" onclick="setFilter('Tech Help', this)">💻 Tech</button>
+        <button class="filter-btn" data-cat="Hospital" onclick="setFilter('Hospital', this)">🏥 Hospital</button>
+      </div>
+      <div class="browse-grid" id="browse-grid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-emoji">⏳</div>
+          <h3>Loading tasks...</h3>
+          <p>Fetching available tasks nearby.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY APPLICATIONS -->
+    <div class="content-section" id="my-apps">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">My Applications</h1>
+          <p class="dash-subtitle">Tasks you've applied for</p>
+        </div>
+      </div>
+      <div id="my-apps-list">
+        <div class="empty-state">
+          <div class="empty-emoji">📬</div>
+          <h3>No applications yet</h3>
+          <p>Browse tasks and apply to start earning!</p>
+          <button class="btn btn-primary" onclick="showSection('browse')">Browse Tasks</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVE TASKS -->
+    <div class="content-section" id="active-tasks">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Active Tasks</h1>
+          <p class="dash-subtitle">Tasks you're currently working on</p>
+        </div>
+      </div>
+      <div id="active-tasks-list">
+        <div class="empty-state">
+          <div class="empty-emoji">⚡</div>
+          <h3>No active tasks</h3>
+          <p>Apply for tasks and get accepted to see them here.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EARNINGS -->
+    <div class="content-section" id="earnings">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">Earnings</h1>
+          <p class="dash-subtitle">Track your income from completed tasks</p>
+        </div>
+      </div>
+      <div class="earnings-card">
+        <div class="earn-title">💰 Total Earned (All Time)</div>
+        <div class="earn-amount">₹<span id="total-earned">0</span></div>
+        <div class="earn-sub" id="tasks-done-label">0 tasks completed</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value" id="month-earned">₹0</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">My Rating</div><div class="stat-value" id="my-rating">—</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Completed</div><div class="stat-value" id="completed-count">0</div></div>
+      </div>
+      <h3 style="font-family:var(--font-display);margin:24px 0 16px">Completed Tasks History</h3>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="profile-section">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title">My Profile</h1>
+          <p class="dash-subtitle">Your helper profile</p>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:var(--radius);padding:36px;max-width:640px;box-shadow:var(--shadow);border:1px solid var(--warm-100)">
+        <div style="text-align:center;margin-bottom:32px">
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--amber-100);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 16px">🎓</div>
+          <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:700" id="profile-name">—</h3>
+          <span class="badge badge-blue" style="margin-top:8px">Student Helper</span>
+        </div>
+        <div class="form-group"><label>Full Name</label><input type="text" class="input" id="p-name" placeholder="—"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" class="input" id="p-phone" placeholder="—"/></div>
+        <div class="form-group"><label>City</label><input type="text" class="input" id="p-city" placeholder="—"/></div>
+        <div class="form-group"><label>College</label><input type="text" class="input" id="p-college" placeholder="—"/></div>
+        <div class="form-group">
+          <label>About Me (shown to elders)</label>
+          <textarea class="input" id="p-bio" placeholder="Tell elders a bit about yourself..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+<div class="loader-overlay" id="loader" style="display:none"><div class="spinner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+let currentUser = null;
+let userProfile = null;
+let allTasks = [];
+let appliedTaskIds = new Set();
+let activeFilter = 'all';
+
+const catEmojis = { Medicine:'💊', Grocery:'🛒', Cleaning:'🧹', Cooking:'🍳', 'Tech Help':'💻', Hospital:'🏥', Laundry:'🧺', Other:'📦' };
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const auth = await requireAuth('helper');
+  if (!auth) return;
+  currentUser = auth.session.user;
+  userProfile = auth.profile;
+  document.getElementById('sidebar-name').textContent = userProfile.full_name || 'Helper';
+  document.getElementById('profile-name').textContent = userProfile.full_name || '';
+  document.getElementById('p-name').value = userProfile.full_name || '';
+  document.getElementById('p-phone').value = userProfile.phone || '';
+  document.getElementById('p-city').value = userProfile.city || '';
+  document.getElementById('p-college').value = userProfile.college || '';
+  document.getElementById('p-bio').value = userProfile.bio || '';
+  loadBrowseTasks();
+  loadMyApplications();
+  loadActiveTasks();
+  loadEarnings();
+});
+
+function showSection(id) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event?.currentTarget?.classList.add('active');
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function showLoader(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+
+async function loadBrowseTasks() {
+  const { data } = await sb.from('tasks').select('*').eq('status', 'open').order('created_at', { ascending: false });
+  allTasks = data || [];
+  document.getElementById('available-count').textContent = allTasks.length;
+
+  const { data: myApps } = await sb.from('applications').select('task_id').eq('helper_id', currentUser.id);
+  appliedTaskIds = new Set((myApps || []).map(a => a.task_id));
+
+  renderTasks();
+}
+
+function setFilter(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function filterTasks() { renderTasks(); }
+
+function renderTasks() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = allTasks.filter(t => {
+    const matchCat = activeFilter === 'all' || t.category === activeFilter;
+    const matchQ = !q || t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q) || t.location?.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  const grid = document.getElementById('browse-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-emoji">🔍</div><h3>No tasks found</h3><p>Try different filters or check back later.</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(t => {
+    const applied = appliedTaskIds.has(t.id);
+    const urgencyColor = t.urgency === 'urgent' ? 'badge-red' : t.urgency === 'today' ? 'badge-amber' : 'badge-green';
+    return `
+    <div class="task-card">
+      <div class="task-header">
+        <div>
+          <div class="task-emoji-big">${catEmojis[t.category] || '📦'}</div>
+          <div class="task-title">${t.title}</div>
+        </div>
+        <span class="badge ${urgencyColor}">${t.urgency}</span>
+      </div>
+      <p class="task-desc">${t.description}</p>
+      <div class="task-meta">
+        <span class="badge badge-amber">📍 ${t.location || 'N/A'}</span>
+        <span class="badge badge-blue">${t.category}</span>
+      </div>
+      <div class="task-footer">
+        <div>
+          <div class="task-price">₹${t.budget}</div>
+          <div class="task-elder">by ${t.elder_name || 'Elder'}</div>
+        </div>
+        ${applied
+          ? '<span class="badge badge-green">✓ Applied</span>'
+          : `<button class="btn btn-primary btn-sm" onclick="applyTask('${t.id}')">Apply Now →</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function applyTask(taskId) {
+  if (appliedTaskIds.has(taskId)) return showToast('Already applied!', 'info');
+  showLoader(true);
+  const { error } = await sb.from('applications').insert({
+    task_id: taskId,
+    helper_id: currentUser.id,
+    helper_name: userProfile.full_name,
+    status: 'pending',
+    applied_at: new Date().toISOString()
+  });
+  showLoader(false);
+  if (error) return showToast('Error: ' + error.message, 'error');
+  appliedTaskIds.add(taskId);
+  showToast('Application sent! 🎉', 'success');
+  renderTasks();
+  loadMyApplications();
+}
+
+async function loadMyApplications() {
+  const { data } = await sb.from('applications')
+    .select('*, tasks(title, category, budget, urgency, location)')
+    .eq('helper_id', currentUser.id)
+    .order('applied_at', { ascending: false });
+
+  if (!data || data.length === 0) return;
+  const list = document.getElementById('my-apps-list');
+  list.innerHTML = data.map(a => `
+    <div class="my-app-item">
+      <div class="my-app-emoji">${catEmojis[a.tasks?.category] || '📦'}</div>
+      <div class="my-app-info">
+        <div class="my-app-title">${a.tasks?.title || 'Task'}</div>
+        <div class="my-app-meta">₹${a.tasks?.budget || '—'} · 📍 ${a.tasks?.location || '—'} · ${new Date(a.applied_at).toLocaleDateString()}</div>
+      </div>
+      <span class="badge ${a.status === 'accepted' ? 'badge-green' : a.status === 'rejected' ? 'badge-red' : 'badge-amber'}">${a.status}</span>
+    </div>
+  `).join('');
+}
+
+async function loadActiveTasks() {
+  const { data } = await sb.from('applications')
+    .select('*, tasks(title, category, budget, location, elder_name, elder_id)')
+    .eq('helper_id', currentUser.id)
+    .eq('status', 'accepted');
+
+  if (!data || data.length === 0) return;
+  const list = document.getElementById('active-tasks-list');
+  list.innerHTML = data.map(a => `
+    <div class="my-app-item">
+      <div class="my-app-emoji">${catEmojis[a.tasks?.category] || '📦'}</div>
+      <div class="my-app-info">
+        <div class="my-app-title">${a.tasks?.title || 'Task'}</div>
+        <div class="my-app-meta">₹${a.tasks?.budget} · 📍 ${a.tasks?.location} · Elder: ${a.tasks?.elder_name || '—'}</div>
+      </div>
+      <span class="badge badge-blue">In Progress</span>
+    </div>
+  `).join('');
+}
+
+async function loadEarnings() {
+  const { data } = await sb.from('applications')
+    .select('*, tasks(title, category, budget, created_at)')
+    .eq('helper_id', currentUser.id)
+    .eq('status', 'accepted');
+
+  const completed = (data || []).filter(a => a.tasks);
+  const total = completed.reduce((s, a) => s + (a.tasks?.budget || 0), 0);
+  const now = new Date(); const m = now.getMonth(); const y = now.getFullYear();
+  const monthly = completed.filter(a => {
+    const d = new Date(a.tasks?.created_at || '');
+    return d.getMonth() === m && d.getFullYear() === y;
+  }).reduce((s, a) => s + (a.tasks?.budget || 0), 0);
+
+  document.getElementById('total-earned').textContent = total;
+  document.getElementById('tasks-done-label').textContent = `${completed.length} tasks completed`;
+  document.getElementById('month-earned').textContent = '₹' + monthly;
+  document.getElementById('completed-count').textContent = completed.length;
+  document.getElementById('my-rating').textContent = userProfile.rating || 'New';
+
+  if (completed.length > 0) {
+    document.getElementById('history-list').innerHTML = completed.map(a => `
+      <div class="my-app-item">
+        <div class="my-app-emoji">${catEmojis[a.tasks?.category] || '📦'}</div>
+        <div class="my-app-info">
+          <div class="my-app-title">${a.tasks?.title || 'Task'}</div>
+          <div class="my-app-meta">${new Date(a.tasks?.created_at).toLocaleDateString()}</div>
+        </div>
+        <div style="font-family:var(--font-display);font-weight:700;color:var(--amber-600)">+₹${a.tasks?.budget}</div>
+      </div>
+    `).join('');
+  }
+}
+
+async function saveProfile() {
+  showLoader(true);
+  const { error } = await sb.from('profiles').update({
+    full_name: document.getElementById('p-name').value,
+    phone: document.getElementById('p-phone').value,
+    city: document.getElementById('p-city').value,
+    college: document.getElementById('p-college').value,
+    bio: document.getElementById('p-bio').value,
+  }).eq('id', currentUser.id);
+  showLoader(false);
+  if (error) return showToast('Error: ' + error.message, 'error');
+  showToast('Profile saved! ✅', 'success');
+}
+</script>
+</body>
+</html>
