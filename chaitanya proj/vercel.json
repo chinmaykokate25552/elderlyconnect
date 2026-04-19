@@ -6,7 +6,8 @@
     { "source": "/elder", "destination": "/elder.html" },
     { "source": "/helper", "destination": "/helper.html" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/:path*", "destination": "/404.html" }
+    { "source": "/:path*", "destination": "/index.html" }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "trailingSlash": false
 }
